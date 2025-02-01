@@ -21,26 +21,21 @@ function main() {
 function simpleMA(maRef, price, period, shift) {
     maRef.fill(0.0, 0, period + shift - 1);
 
-    let bar = 0;
     let sum = 0.0;
-    while (bar < period) {
+    for (let bar = 0; bar < period; ++bar) {
         sum += price[bar];
-        ++bar;
     }
 
     let prev = sum / period;
     maRef[period + shift - 1] = prev;
 
-    bar = period
-    const len = price.length - shift;
-    while (bar < len) {
+    for (let bar = period, len = price.length - shift; bar < len; ++bar) {
         let temp;
         temp  = price[bar];
         temp -= price[bar - period];
         temp /= period;
         prev += temp;
         maRef[bar + shift] = prev;
-        ++bar;
     }
 }
 
