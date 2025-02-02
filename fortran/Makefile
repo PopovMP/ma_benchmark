@@ -18,9 +18,9 @@ OBJECTS = $(OBJDIR)/data_set.o       \
 all : $(BIN)
 
 $(BIN) : $(OBJECTS)
-	$(CC) $(WARN) $(STD) $(OPT) -o $@ $^ $(SRCDIR)/$(BIN).f08
+	$(CC) $(WARN) $(STD) $(OPT) -o $@ $^ $(SRCDIR)/$(BIN).f90
 
-$(OBJDIR)/%.o : $(LIBDIR)/%.f08
+$(OBJDIR)/%.o : $(LIBDIR)/%.f90
 	$(CC) $(WARN) $(STD) $(OPT) -c -o $@ $<
 
 .PHONY : clean
