@@ -28,10 +28,10 @@ program main
 
     call init_shared_state(shared_state, data_set%bars)
 
-    call bench_ma(data_set, shared_state,  10)
-    call bench_ma(data_set, shared_state,  10)
-    call bench_rsi(data_set, shared_state,  10)
-    call bench_rsi(data_set, shared_state,  10)
+    call bench_ma (data_set, shared_state, 10)
+    call bench_ma (data_set, shared_state, 10)
+    call bench_rsi(data_set, shared_state, 10)
+    call bench_rsi(data_set, shared_state, 10)
 
     contains
 

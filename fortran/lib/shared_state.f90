@@ -4,7 +4,7 @@ module Shared_state_module
     private
 
     type, public :: Shared_state_type
-        integer :: firstBar
+        integer                                 :: firstBar
         real(real64), dimension(:), allocatable :: numA
         real(real64), dimension(:), allocatable :: numB
         real(real64), dimension(:), allocatable :: numC
@@ -19,8 +19,9 @@ module Shared_state_module
 
     subroutine init_shared_state(shared_state, bars)
         type(Shared_state_type), intent(inout) :: shared_state
-        integer                                :: bars
+        integer,                 intent(in)    :: bars
 
+        shared_state%firstBar = 2
         allocate(shared_state%numA   (bars))
         allocate(shared_state%numB   (bars))
         allocate(shared_state%numC   (bars))
