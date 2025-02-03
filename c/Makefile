@@ -7,7 +7,7 @@ WARN = -Wall -Wextra -pedantic
 LIBS = -lm
 STD  = -std=c2x
 OPT  = -O2
-BIN = ./main
+BIN  = ./main
 
 OBJECTS = $(OBJDIR)/data-set.o       \
           $(OBJDIR)/shared-state.o   \

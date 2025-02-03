@@ -3,16 +3,16 @@
 
 typedef struct {
     int     firstBar;
-    double* numA;
-    double* numB;
-    double* numC;
-    double* numD;
-    double* balance;
-    double* equity;
+    double *numA;
+    double *numB;
+    double *numC;
+    double *numD;
+    double *balance;
+    double *equity;
 } SharedState;
 
-SharedState* allocSharedState(int bars);
+SharedState *allocSharedState(int bars);
 
-void freeSharedState(SharedState* sharedState);
+void freeSharedState(SharedState *sharedState);
 
 #endif

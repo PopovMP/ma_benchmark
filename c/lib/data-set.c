@@ -6,8 +6,8 @@
 
 #include "data-set.h"
 
-DataSet* allocDataSet(const int bars) {
-    DataSet* dataSet = malloc(sizeof(DataSet));
+DataSet *allocDataSet(const int bars) {
+    DataSet *dataSet = malloc(sizeof(DataSet));
     if (dataSet == NULL) return NULL;
 
     dataSet->bars = bars;
@@ -23,7 +23,7 @@ DataSet* allocDataSet(const int bars) {
     return dataSet;
 }
 
-void freeDataSet(DataSet* dataSet) {
+void freeDataSet(DataSet *dataSet) {
     if (dataSet == NULL) return;
 
     if (dataSet->time != NULL) {
@@ -66,7 +66,7 @@ void freeDataSet(DataSet* dataSet) {
     dataSet = NULL;
 }
 
-long getFileSize(FILE* file) {
+long getFileSize(FILE *file) {
     fseek(file, 0, SEEK_END);
     const long size = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -93,8 +93,8 @@ time_t getMillennium(void) {
  * @param filePath The path of the data file to read.
  * @return The DataSet object containing the data read from the file, or NULL if an error occurred.
  */
-DataSet* readDataSet(const char* filePath, const int digits) {
-    FILE* file = fopen(filePath, "rb");
+DataSet *readDataSet(const char *filePath, const int digits) {
+    FILE *file = fopen(filePath, "rb");
     if (file == NULL) {
         fprintf(stderr, "Failed to open file.\n");
         return NULL;

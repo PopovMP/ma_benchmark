@@ -5,17 +5,17 @@
 
 typedef struct {
     int     bars;
-    time_t* time;
-    double* open;
-    double* high;
-    double* low;
-    double* close;
-    int*    volume;
-    int*    spreads;
+    time_t *time;
+    double *open;
+    double *high;
+    double *low;
+    double *close;
+    int    *volume;
+    int    *spreads;
 } DataSet;
 
-DataSet* readDataSet(const char* filePath, const int digits);
+DataSet *readDataSet(const char *const filePath, const int digits);
 
-void freeDataSet(DataSet* dataSet);
+void freeDataSet(DataSet *dataSet);
 
 #endif

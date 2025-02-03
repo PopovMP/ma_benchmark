@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "shared-state.h"
 
-SharedState* allocSharedState(int bars) {
+SharedState *allocSharedState(int bars) {
     SharedState *sharedState = malloc(sizeof(SharedState));
     if (sharedState == NULL) return NULL;
 
@@ -17,7 +17,7 @@ SharedState* allocSharedState(int bars) {
     return sharedState;
 }
 
-void freeSharedState(SharedState* sharedState) {
+void freeSharedState(SharedState *sharedState) {
     if (sharedState == NULL) return;
 
     if (sharedState->numA != NULL) {

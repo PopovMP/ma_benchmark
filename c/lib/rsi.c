@@ -1,4 +1,4 @@
-void rsi(double* restrict rsi_ref, const double* const price,
+void rsi(double *restrict rsi_ref, const double *const price,
          const int bars, const int period) {
     rsi_ref[0] = 0.0;
     const int per1 = period - 1;

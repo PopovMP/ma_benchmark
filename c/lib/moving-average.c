@@ -1,23 +1,23 @@
-#include <string.h>
+#include <strings.h>
 
-void simpleMA(double* restrict ma_ref, const double* const price,
-              const int bars, const int period, const int shift) {
-    memset(ma_ref, 0.0, (period + shift - 1) * sizeof(double));
+void initMA(double *restrict ma, const double *const price,
+            const int period, const int shift) {
+    bzero(ma, (period + shift - 1) * sizeof(double));
 
     double sum = 0.0;
     for (int bar = 0; bar < period; ++bar) {
         sum += price[bar];
     }
 
-    double prev = sum / period;
-    ma_ref[period + shift - 1] = prev;
+    ma[period + shift - 1] = sum / period;
+}
 
-    for (int bar = period, len = bars - shift; bar < len; ++bar) {
-        register double temp;
-        temp  = price[bar];
-        temp -= price[bar - period];
-        temp /= period;
-        prev += temp;
-        ma_ref[bar + shift] = prev;
+void simpleMA(double *restrict ma, const double *const price,
+              const int bars, const int period, const int shift) {
+    initMA(ma, price, period, shift);
+
+    for (int bar = period; bar < bars - shift; ++bar) {
+        ma[bar + shift] = ma[bar + shift - 1] +
+                          (price[bar] - price[bar - period]) / period;
     }
 }
