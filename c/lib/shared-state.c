@@ -1,50 +1,50 @@
 #include <malloc.h>
 #include "shared-state.h"
 
-SharedState *allocSharedState(int bars) {
-    SharedState *sharedState = malloc(sizeof(SharedState));
-    if (sharedState == NULL) return NULL;
+SharedState *alloc_shared_state(int bars) {
+    SharedState *state = malloc(sizeof(SharedState));
+    if (state == NULL) return NULL;
 
-    sharedState->firstBar = 0;
+    state->firstBar = 0;
 
-    if ((sharedState->numA    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((sharedState->numB    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((sharedState->numC    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((sharedState->numD    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((sharedState->balance = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((sharedState->equity  = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->numA    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->numB    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->numC    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->numD    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->balance = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((state->equity  = malloc(sizeof(double) * bars)) == NULL) return NULL;
 
-    return sharedState;
+    return state;
 }
 
-void freeSharedState(SharedState *sharedState) {
-    if (sharedState == NULL) return;
+void free_shared_state(SharedState *state) {
+    if (state == NULL) return;
 
-    if (sharedState->numA != NULL) {
-        free(sharedState->numA);
-        sharedState->numA = NULL;
+    if (state->numA != NULL) {
+        free(state->numA);
+        state->numA = NULL;
     }
-    if (sharedState->numB != NULL) {
-        free(sharedState->numB);
-        sharedState->numB = NULL;
+    if (state->numB != NULL) {
+        free(state->numB);
+        state->numB = NULL;
     }
-    if (sharedState->numC != NULL) {
-        free(sharedState->numC);
-        sharedState->numC = NULL;
+    if (state->numC != NULL) {
+        free(state->numC);
+        state->numC = NULL;
     }
-    if (sharedState->numD != NULL) {
-        free(sharedState->numD);
-        sharedState->numD = NULL;
+    if (state->numD != NULL) {
+        free(state->numD);
+        state->numD = NULL;
     }
-    if (sharedState->balance != NULL) {
-        free(sharedState->balance);
-        sharedState->balance = NULL;
+    if (state->balance != NULL) {
+        free(state->balance);
+        state->balance = NULL;
     }
-    if (sharedState->equity != NULL) {
-        free(sharedState->equity);
-        sharedState->equity = NULL;
+    if (state->equity != NULL) {
+        free(state->equity);
+        state->equity = NULL;
     }
 
-    free(sharedState);
-    sharedState = NULL;
+    free(state);
+    state = NULL;
 }

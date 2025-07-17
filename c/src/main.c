@@ -6,8 +6,9 @@
 #include "../lib/shared-state.h"
 #include "../lib/moving-average.h"
 #include "../lib/rsi.h"
+#include "../lib/std-dev.h"
 
-void printBar(DataSet *dataSet, int bar) {
+void print_bar(DataSet *dataSet, int bar) {
     printf("Bar: %d, %ld, %.5f, %.5f, %.5f, %.5f, %d, %d\n", bar + 1,
            dataSet->time   [bar],
            dataSet->open   [bar],
@@ -18,87 +19,115 @@ void printBar(DataSet *dataSet, int bar) {
            dataSet->spreads[bar]);
 }
 
-double calcMA(const DataSet *const dataSet, SharedState *restrict sharedState, const int runs) {
-    const int           bars  = dataSet->bars;
-    const double *const close = dataSet->close;
-    double *restrict    res   = sharedState->numA;
+double calc_ma(const DataSet *const data, SharedState *restrict state, const int runs) {
+    const int               bars      = data->bars;
+    const double * const    close_ref = data->close;
+          double * restrict ma_ref    = state->numA;
 
     double sum = 0.0;
 
-    for (int i = 0; i < runs; ++i) {
+    for (int run = 0; run < runs; ++run) {
         for (int period = 1; period < 200; ++period) {
-            simpleMA(res, close, bars, period, 0);
-            sum += res[bars - 1];
+            simple_ma(ma_ref, close_ref, bars, period, 0);
+            sum += ma_ref[bars - 1];
         }
     }
 
     return sum;
 }
 
-double calcRSI(const DataSet *const dataSet, SharedState *restrict sharedState, const int runs) {
-    const int           bars  = dataSet->bars;
-    const double *const close = dataSet->close;
-    double *restrict    res   = sharedState->numA;
+double calc_rsi(const DataSet *const data, SharedState *restrict state, const int runs) {
+    const int               bars      = data->bars;
+    const double * const    close_ref = data->close;
+          double * restrict rsi_ref   = state->numA;
 
     double sum = 0.0;
-    for (int i = 0; i < runs; ++i) {
+    for (int run = 0; run < runs; ++run) {
         for (int period = 1; period < 200; ++period) {
-            rsi(res, close, bars, period);
-            sum += res[bars - 1];
+            rsi(rsi_ref, close_ref, bars, period);
+            sum += rsi_ref[bars - 1];
         }
     }
 
     return sum;
 }
 
-void benchMA(const DataSet *const dataSet, SharedState *restrict sharedState, const int runs) {
-    const clock_t begin = clock();
+double calc_std_dev(const DataSet *const data, SharedState *restrict state, const int runs) {
+    const int               bars         = data->bars;
+    const double * const    close_ref    = data->close;
+          double * restrict close_ma_ref = state->numA;
+          double * restrict std_dev_ref  = state->numB;
 
-    const double sumMA = calcMA(dataSet, sharedState, runs);
+    double sum = 0.0;
+    for (int run = 0; run < runs; ++run) {
+        for (int period = 1; period < 200; ++period) {
+            simple_ma(close_ma_ref, close_ref, bars, period, 0);
+            std_dev(std_dev_ref, close_ref, close_ma_ref, bars, period);
+            sum += std_dev_ref[bars - 1];
+        }
+    }
 
-    const clock_t end = clock();
-
-    printf("MA time: %.2f seconds\n", (end - begin)/1000000.0);
-    printf("MA Sum %.5f\n", sumMA);
+    return sum;
 }
 
-void benchRSI(const DataSet *const dataSet, SharedState *restrict sharedState, const int runs) {
+void bench_ma(const DataSet *const data, SharedState *restrict state, const int runs) {
     const clock_t begin = clock();
 
-    const double sumRSI = calcRSI(dataSet, sharedState, runs);
+    const double sum = calc_ma(data, state, runs);
 
     const clock_t end = clock();
 
-    printf("RSI time: %.2f seconds\n", (end - begin)/1000000.0);
-    printf("RSI Sum %.5f\n", sumRSI);
+    printf("MA    : %.2f seconds, sum:  %.5f\n", (end - begin) / 1000000.0, sum);
+}
+
+void bench_rsi(const DataSet *const data, SharedState *restrict state, const int runs) {
+    const clock_t begin = clock();
+
+    const double sum = calc_rsi(data, state, runs);
+
+    const clock_t end = clock();
+
+    printf("RSI   : %.2f seconds, sum: %.5f\n", (end - begin) / 1000000.0, sum);
+}
+
+void bench_std_dev(const DataSet *const data, SharedState *restrict state, const int runs) {
+    const clock_t begin = clock();
+
+    const double sum = calc_std_dev(data, state, runs);
+
+    const clock_t end = clock();
+
+    printf("StdDev: %.2f seconds, sum:     %.5f\n", (end - begin) / 1000000.0, sum);
 }
 
 int main(void) {
-    const char *filePath = "./data/EURUSD15.lb";
+    const char *file_path = "./data/EURUSD15.lb";
 
-    DataSet *dataSet = readDataSet(filePath, 5);
-    if (dataSet == NULL) {
+    DataSet *data = read_data_set(file_path, 5);
+    if (data == NULL) {
         return EXIT_FAILURE;
     }
 
-    printBar(dataSet, dataSet->bars-1);
+    print_bar(data, data->bars - 1);
 
-    SharedState *sharedState = allocSharedState(dataSet->bars);
+    SharedState *state = alloc_shared_state(data->bars);
 
-    if (sharedState == NULL) {
+    if (state == NULL) {
         printf("Cannot allocate the SharedSate\n");
-        freeDataSet(dataSet);
-        dataSet = NULL;
+        free_data_set(data);
+        data = NULL;
         return EXIT_FAILURE;
     }
 
-    benchMA (dataSet, sharedState, 10);
-    benchMA (dataSet, sharedState, 10);
-    benchRSI(dataSet, sharedState, 10);
-    benchRSI(dataSet, sharedState, 10);
+    bench_ma     (data, state, 10);
+    bench_ma     (data, state, 10);
+    bench_rsi    (data, state, 10);
+    bench_rsi    (data, state, 10);
+    bench_std_dev(data, state, 10);
+    bench_std_dev(data, state, 10);
 
-    freeSharedState(sharedState);
-    freeDataSet(dataSet);
+    free_shared_state(state);
+    free_data_set(data);
 
     return EXIT_SUCCESS;
 }

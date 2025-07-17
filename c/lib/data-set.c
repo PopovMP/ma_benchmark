@@ -6,74 +6,74 @@
 
 #include "data-set.h"
 
-DataSet *allocDataSet(const int bars) {
-    DataSet *dataSet = malloc(sizeof(DataSet));
-    if (dataSet == NULL) return NULL;
+DataSet *alloc_data_set(const int bars) {
+    DataSet * restrict data = malloc(sizeof(DataSet));
+    if (data == NULL) return NULL;
 
-    dataSet->bars = bars;
+    data->bars = bars;
 
-    if ((dataSet->time    = malloc(sizeof(time_t) * bars)) == NULL) return NULL;
-    if ((dataSet->open    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((dataSet->high    = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((dataSet->low     = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((dataSet->close   = malloc(sizeof(double) * bars)) == NULL) return NULL;
-    if ((dataSet->volume  = malloc(sizeof(int   ) * bars)) == NULL) return NULL;
-    if ((dataSet->spreads = malloc(sizeof(int   ) * bars)) == NULL) return NULL;
+    if ((data->time    = malloc(sizeof(time_t) * bars)) == NULL) return NULL;
+    if ((data->open    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((data->high    = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((data->low     = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((data->close   = malloc(sizeof(double) * bars)) == NULL) return NULL;
+    if ((data->volume  = malloc(sizeof(int   ) * bars)) == NULL) return NULL;
+    if ((data->spreads = malloc(sizeof(int   ) * bars)) == NULL) return NULL;
 
-    return dataSet;
+    return data;
 }
 
-void freeDataSet(DataSet *dataSet) {
-    if (dataSet == NULL) return;
+void free_data_set(DataSet * restrict data) {
+    if (data == NULL) return;
 
-    if (dataSet->time != NULL) {
-        free(dataSet->time);
-        dataSet->time = NULL;
+    if (data->time != NULL) {
+        free(data->time);
+        data->time = NULL;
     }
 
-    if (dataSet->open != NULL) {
-        free(dataSet->open);
-        dataSet->open = NULL;
+    if (data->open != NULL) {
+        free(data->open);
+        data->open = NULL;
     }
 
-    if (dataSet->high != NULL) {
-        free(dataSet->high);
-        dataSet->high = NULL;
+    if (data->high != NULL) {
+        free(data->high);
+        data->high = NULL;
     }
 
-    if (dataSet->low != NULL) {
-        free(dataSet->low);
-        dataSet->low = NULL;
+    if (data->low != NULL) {
+        free(data->low);
+        data->low = NULL;
     }
 
-    if (dataSet->close != NULL) {
-        free(dataSet->close);
-        dataSet->close = NULL;
+    if (data->close != NULL) {
+        free(data->close);
+        data->close = NULL;
     }
 
-    if (dataSet->volume != NULL) {
-        free(dataSet->volume);
-        dataSet->volume = NULL;
+    if (data->volume != NULL) {
+        free(data->volume);
+        data->volume = NULL;
     }
 
-    if (dataSet->spreads != NULL) {
-        free(dataSet->spreads);
-        dataSet->spreads = NULL;
+    if (data->spreads != NULL) {
+        free(data->spreads);
+        data->spreads = NULL;
     }
 
-    free(dataSet);
+    free(data);
 
-    dataSet = NULL;
+    data = NULL;
 }
 
-long getFileSize(FILE *file) {
+long get_file_size(FILE * restrict file) {
     fseek(file, 0, SEEK_END);
     const long size = ftell(file);
     fseek(file, 0, SEEK_SET);
     return size;
 }
 
-time_t getMillennium(void) {
+time_t get_millennium(void) {
     struct tm date = {0};
 
     date.tm_year  = 2000 - 1900;
@@ -93,44 +93,44 @@ time_t getMillennium(void) {
  * @param filePath The path of the data file to read.
  * @return The DataSet object containing the data read from the file, or NULL if an error occurred.
  */
-DataSet *readDataSet(const char *filePath, const int digits) {
-    FILE *file = fopen(filePath, "rb");
+DataSet *read_data_set(const char * const file_path, const int digits) {
+    FILE * restrict file = fopen(file_path, "rb");
     if (file == NULL) {
         fprintf(stderr, "Failed to open file.\n");
         return NULL;
     }
 
-    const int bars = (int) (getFileSize(file) / 28);
+    const int bars = (int) (get_file_size(file) / 28);
 
-    DataSet *dataSet = allocDataSet(bars);
-    if (dataSet == NULL) {
+    DataSet * restrict data = alloc_data_set(bars);
+    if (data == NULL) {
         fprintf(stderr, "Failed to allocate DataSet.\n");
         fclose(file);
         return NULL;
     }
 
-    const time_t millennium = getMillennium();
-    const double multiplier = pow(10, digits);
+    const time_t millennium = get_millennium();
+    const double divider    = pow(10, digits);
 
-    uint32_t temp[7];
-    for (int i = 0; i < bars; ++i) {
-        const size_t bytesRead = fread(&temp, 4, 7, file);
-        if (bytesRead != 7) {
+    uint32_t buffer[7];
+    for (int bar = 0; bar < bars; ++bar) {
+        const size_t chunks_read = fread(&buffer, 4, 7, file);
+        if (chunks_read != 7) {
             fprintf(stderr, "Failed to read data bar.\n");
             fclose(file);
             return NULL;
         }
 
-        dataSet->time   [i] = (time_t) (temp[0] * 60 + millennium);
-        dataSet->open   [i] = (double) (temp[1] / multiplier);
-        dataSet->high   [i] = (double) (temp[2] / multiplier);
-        dataSet->low    [i] = (double) (temp[3] / multiplier);
-        dataSet->close  [i] = (double) (temp[4] / multiplier);
-        dataSet->volume [i] = (int   )  temp[5];
-        dataSet->spreads[i] = (int   )  temp[6];
+        data->time   [bar] = (time_t) (buffer[0] * 60 + millennium);
+        data->open   [bar] = (double) (buffer[1] / divider);
+        data->high   [bar] = (double) (buffer[2] / divider);
+        data->low    [bar] = (double) (buffer[3] / divider);
+        data->close  [bar] = (double) (buffer[4] / divider);
+        data->volume [bar] = (int   )  buffer[5];
+        data->spreads[bar] = (int   )  buffer[6];
     }
 
     fclose(file);
 
-    return dataSet;
+    return data;
 }

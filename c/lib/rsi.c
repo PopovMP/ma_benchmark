@@ -1,5 +1,9 @@
-void rsi(double *restrict rsi_ref, const double *const price,
-         const int bars, const int period) {
+void rsi(
+      double * restrict rsi_ref,
+const double * const    price,
+const          int      bars,
+const          int      period
+) {
     rsi_ref[0] = 0.0;
     const int per1 = period - 1;
     double pos = 0.0, neg = 0.0;
@@ -9,22 +13,18 @@ void rsi(double *restrict rsi_ref, const double *const price,
         diff -= price[bar - 1];
 
         // Pos
-        temp  = pos;
-        temp *= per1;
+        temp = pos * per1;
         if (diff > 0.0) {
             temp += diff;
         }
-        temp /= period;
-        pos   = temp;
+        pos = temp / period;
 
         // Neg
-        temp  = neg;
-        temp *= per1;
+        temp = neg * per1;
         if (diff < 0.0) {
             temp -= diff;
         }
-        temp /= period;
-        neg   = temp;
+        neg = temp / period;
 
         rsi_ref[bar] = 100.0 - 100.0 / (1.0 + pos / neg);
     }

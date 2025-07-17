@@ -14,8 +14,8 @@ typedef struct {
     int    *spreads;
 } DataSet;
 
-DataSet *readDataSet(const char *const filePath, const int digits);
+DataSet *read_data_set(const char * const file_path, const int digits);
 
-void freeDataSet(DataSet *dataSet);
+void free_data_set(DataSet * restrict data);
 
 #endif

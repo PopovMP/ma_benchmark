@@ -11,8 +11,8 @@ typedef struct {
     double *equity;
 } SharedState;
 
-SharedState *allocSharedState(int bars);
+SharedState *alloc_shared_state(int bars);
 
-void freeSharedState(SharedState *sharedState);
+void free_shared_state(SharedState *sharedState);
 
 #endif
