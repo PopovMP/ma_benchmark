@@ -12,69 +12,102 @@ function main() {
         numD: new Array(dataSet.bars).fill(0.0),
     };
 
-    setTimeout(benchMA,   0, state,  10);
-    setTimeout(benchMA,   3, state,  10);
-    setTimeout(benchRSI,  9, state,  10);
-    setTimeout(benchRSI, 15, state,  10);
+    setTimeout(benchMA,      0, state, 10);
+    setTimeout(benchMA,      2, state, 10);
+    setTimeout(benchRSI,     4, state, 10);
+    setTimeout(benchRSI,     6, state, 10);
+    setTimeout(benchStdDev,  8, state, 10);
+    setTimeout(benchStdDev, 10, state, 10);
 }
 
 function simpleMA(maRef, price, period, shift) {
+    let sum, bar, prev, temp, len, periodInv;
     maRef.fill(0.0, 0, period + shift - 1);
 
-    let sum = 0.0;
-    for (let bar = 0; bar < period; ++bar) {
+    sum = 0.0;
+    bar = 0;
+    while (bar < period) {
         sum += price[bar];
+        ++bar;
     }
 
-    let prev = sum / period;
+    prev = sum / period;
     maRef[period + shift - 1] = prev;
 
-    for (let bar = period, len = price.length - shift; bar < len; ++bar) {
-        let temp;
+    bar = period;
+    len = price.length - shift
+    periodInv = 1.0 / period;
+    while (bar < len) {
         temp  = price[bar];
         temp -= price[bar - period];
-        temp /= period;
+        temp *= periodInv;
         prev += temp;
         maRef[bar + shift] = prev;
+        ++bar;
     }
 }
 
 // Before optimization: 6.88 seconds
 function rsi(rsi_ref, price, period) {
-    const bars = price.length;
-    const per1 = period - 1;
-    let pos  = 0.0;
-    let neg  = 0.0;
+    let bars, per1, perInv, bar, diff, temp, pos, neg;
+    bars   = price.length;
+    per1   = period - 1;
+    perInv = 1.0 / period;
 
     rsi_ref[0] = 0.0;
-
-    let bar = 1;
-    let diff, temp;
+    bar = 1;
+    pos = 0.0;
+    neg = 0.0;
     while (bar < bars) {
-        diff  = price[bar];
-        diff -= price[bar - 1];
+        diff = price[bar] - price[bar - 1];
 
-        // Pos
-        temp  = pos;
-        temp *= per1;
+        temp = pos * per1;
         if (diff > 0.0) {
             temp += diff;
         }
-        temp /= period;
-        pos   = temp;
+        pos = temp * perInv;
 
-        // Neg
-        temp  = neg;
-        temp *= per1;
+        temp = neg * per1;
         if (diff < 0.0) {
             temp -= diff;
         }
-        temp /= period;
-        neg   = temp;
+        neg = temp * perInv;
 
-        rsi_ref[bar] = 100.0 - 100.0 / (1.0 + pos / neg);
+        rsi_ref[bar] = 100.0 - 100.0 * neg / (pos + neg);
         ++bar;
     }
+}
+
+function stdDev(stdDevs, vals, mas, period) {
+  let len, perInv, sumSq, i, mean, meanSq, variance, valsI, valsIP;
+  len    = vals.length;
+  perInv = 1.0 / period;
+  stdDevs.fill(0.0, 0, period - 1);
+
+  sumSq = 0.0;
+  i     = 0;
+  while (i < period) {
+    valsI  = vals[i];
+    sumSq += valsI * valsI;
+    ++i;
+  }
+
+  mean     = mas[period - 1];
+  meanSq   = mean * mean;
+  variance = sumSq * perInv - meanSq;
+  stdDevs[period - 1] = variance > 0 ? Math.sqrt(variance) : 0;
+
+  i = period;
+  while (i < len) {
+    valsI    = vals[i];
+    valsIP   = vals[i - period];
+    sumSq   += valsI * valsI - valsIP * valsIP;
+    mean     = mas[i];
+    meanSq   = mean * mean;
+    variance = sumSq * perInv - mean * mean;
+    stdDevs[i] = variance > 0 ? Math.sqrt(variance) : 0;
+    ++i;
+  }
 }
 
 function calcMA(dataSet, sharedState, runs) {
@@ -109,6 +142,25 @@ function calcRSI(dataSet, sharedState, runs) {
     return sum;
 }
 
+function calcStdDev(dataSet, sharedState, runs) {
+    const bars      = dataSet.bars;
+    const close     = dataSet.close;
+    const closeMa   = sharedState.numA;
+    const stdDevRef = sharedState.numB;
+
+    let sum   = 0.0;
+
+    for (let i = 0; i < runs; ++i) {
+        for (let period = 1; period < 200; ++period) {
+            simpleMA(closeMa, close, period, 0);
+            stdDev(stdDevRef, close, closeMa, period)
+            sum += stdDevRef[bars-1];
+        }
+    }
+
+    return sum;
+}
+
 function benchMA(state, runs) {
     const begin = Date.now();
 
@@ -117,8 +169,7 @@ function benchMA(state, runs) {
     const end     = Date.now();
     const timeSec = (end - begin) / 1000;
 
-    console.log(`MA time: ${timeSec.toFixed(2)} seconds`);
-    console.log(`MA sum : `, actualSum.toFixed(5));
+    console.log(`MA    : ${timeSec.toFixed(2)} seconds, sum: `, actualSum.toFixed(5));
 }
 
 
@@ -130,6 +181,16 @@ function benchRSI(state, runs) {
     const end     = Date.now();
     const timeSec = (end - begin) / 1000;
 
-    console.log(`RSI time: ${timeSec.toFixed(2)} seconds`);
-    console.log(`RSI sum : `, actualSum.toFixed(5));
+    console.log(`RSI   : ${timeSec.toFixed(2)} seconds, sum:`, actualSum.toFixed(5));
+}
+
+function benchStdDev(state, runs) {
+    const begin = Date.now();
+
+    const actualSum = calcStdDev(dataSet, state, runs);
+
+    const end     = Date.now();
+    const timeSec = (end - begin) / 1000;
+
+    console.log(`StdDev: ${timeSec.toFixed(2)} seconds, sum:    `, actualSum.toFixed(5));
 }
