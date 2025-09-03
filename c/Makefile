@@ -6,8 +6,8 @@ CC   = /usr/bin/gcc
 WARN = -Wall -Wextra -pedantic
 LIBS = -lm
 STD  = -std=c2x
-//OPT  = -Ofast  -ffast-math -march=native
-OPT  = -O2  -ffast-math -march=native
+ARCH = -march=x86-64-v3
+OPT  = -Ofast  -ffast-math
 BIN  = ./main
 
 OBJECTS = $(OBJDIR)/data-set.o       \
@@ -27,16 +27,16 @@ $(OBJDIR):
 
 # Compile the binary from the object files
 $(BIN) : $(OBJECTS)
-	$(CC) $(WARN) $(STD) $(OPT) -o $@ $^ $(LIBS)
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -o $@ $^ $(LIBS)
 	strip $@
 
 # Compile the object files
 $(OBJDIR)/%.o : $(LIBDIR)/%.c $(LIBDIR)/%.h
-	$(CC) $(WARN) $(STD) $(OPT) -c -o $@ $<
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -c -o $@ $<
 
 # Comompile the main object file
 $(OBJDIR)/main.o : $(SRCDIR)/main.c
-	$(CC) $(WARN) $(STD) $(OPT) -c -o $@ $<
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -c -o $@ $<
 
 # Clean up
 .PHONY : clean
@@ -46,12 +46,12 @@ clean :
 # Compile main  and the libs to assembly
 .PHONY : asm
 asm : $(SRCDIR)/main.c $(LIBDIR)/data-set.c $(LIBDIR)/shared-state.c $(LIBDIR)/moving-average.c $(LIBDIR)/rsi.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(SRCDIR)/main.asm $(SRCDIR)/main.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(LIBDIR)/data-set.asm $(LIBDIR)/data-set.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(LIBDIR)/shared-state.asm $(LIBDIR)/shared-state.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(LIBDIR)/moving-average.asm $(LIBDIR)/moving-average.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(LIBDIR)/rsi.asm $(LIBDIR)/rsi.c
-	$(CC) $(WARN) $(STD) $(OPT) -S -Ofast -o $(LIBDIR)/std-dev.asm $(LIBDIR)/std-dev.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(SRCDIR)/main.asm $(SRCDIR)/main.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(LIBDIR)/data-set.asm $(LIBDIR)/data-set.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(LIBDIR)/shared-state.asm $(LIBDIR)/shared-state.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(LIBDIR)/moving-average.asm $(LIBDIR)/moving-average.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(LIBDIR)/rsi.asm $(LIBDIR)/rsi.c
+	$(CC) $(WARN) $(STD) $(ARCH) $(OPT) -S -Ofast -o $(LIBDIR)/std-dev.asm $(LIBDIR)/std-dev.c
 
 .PHONY : clean_asm
 clean_asm :
